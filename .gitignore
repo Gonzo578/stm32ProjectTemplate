@@ -1,0 +1,9 @@
+.vscode/.cortex-debug.registers.state.json
+.vscode/.cortex-debug.peripherals.state.json
+build
+build-native
+debug
+Debug
+.settings
+*.xml
+*.cfg

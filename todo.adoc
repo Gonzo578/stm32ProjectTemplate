@@ -1,0 +1,6 @@
+# ToDo List
+
+* Clean up folder structure regarding platform
+* Clean up folder structure to support multiple target builds
+* Enable cross and native compiling
+* Enable unit tests on native system

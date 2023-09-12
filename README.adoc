@@ -1,0 +1,96 @@
+# CMake Build System for STM32 Microcontrollers
+
+This project has the goal to build up a toolchain to build software for STM32 microcontrollers
+running under Linux (Ubuntu18.04 in my case) using the CMake build system generator and docker.
+
+Goals:
+
+* Encapsulate the build toolchain (compiler, cmake, ...) within a docker container https://github.com/Gonzo578/docker-toolchain [toolchain]
+* Build docker images in a way that single major tools can be easily exchanged without creating big images.
+* Create the build system by using CMake
+
+# General Idea
+Why does building SW for a microcontroller look so much different compared to building software for a linux system?
+Therefore, the general idea is to build a toolchain that is easily maintainable and capable to run builds for a linux
+native system and the target system without doing something different. The native build will then be used to 
+run e.g. unit tests of the different software modules and the target build is clearly used to run the "real" SW
+on the target system to have fun.
+Genrally CMake is prepared for cross compiling by providing it a toolchain file where CMake gets all the target specfic
+stuff out. Instead the approach here is to build a docker container which is designed in a way where CMake can automatically
+detect by itself the target environment. That means the docker container comes only with the appropriate toolchain
+used to build either native or target (Cortex M). All pathes are configured within the container to look like on
+any other Linux distribution.
+In order to provide the general build configuration (all compiler/linker settings) that affect the ABI the idea is
+to ship the container with a conan profile that provides these settings. By this means, the idea is to get rid of the
+toolchain file at all. So the build always looks like a native build and one only needs to replace the docker container
+where the build is run inside.
+This has the further addvantage, that also on the embedded MCU the precompiled libraries can be used as packages without
+re-compiling and further ensuring binary compatibility.
+
+Refernce
+Conan for STM32 discussion: ( https://github.com/conan-io/conan/issues/86 )
+
+
+## To Be Continued
+
+Step by step integrate further tools
+
+* Support unit testing by using gtest (on host system) with a separate docker container including the host toolchain
+* Package management using conan (https://conan.io/)
+* Code documentation using doxygen (http://www.doxygen.nl/)
+* Developer documentation
+* Code style checks clang-format (https://clang.llvm.org/docs/ClangFormat.html)
+* [done] Static code analysis clang-tidy (https://clang.llvm.org/extra/clang-tidy/)
+
+## Using the Docker Toolchain to Build your SW
+
+In order to build your sowtware using docker, move to your project root directory and start the docker container as follows:
+
+ docker run -it -v $(pwd):$(pwd) gonzo578/gcc-arm-embedded-2019q3:V0.0.1 /bin/bash
+
+This starts a docker contrainer including the gcc-arm-embeedded-2019q3 toolchain. The projects root
+directory is mapped to the same directory inside the container. This is required because currently the
+pathes inside of the build results are absolute. In order to debug the application outside of the
+container, the pathes need to be the same (else, the debugger would not find the source files). The other
+solution can be to manually configure the source file locations for the debugger.
+For convenience a script is provided with the project to start the docker container:
+
+ ./run-docker.sh 
+
+## Running your Build
+
+In order to build the software inside the container conduct the following steps:
+
+* Change to the project root folder (same as outside of the container)
+* Create a build folder (´mkdir build´) => use out of source builds! (Note: the CMakeLists.txt is configured to generte an error if
+	you try to build directly in the source tree)
+* Change to the build folder (´cd build´)
+* run the following command
+
+ cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/cm4.cmake -DCMAKE_BUILD_TYPE=Debug ..
+
+Or just call the build-target.sh script which does the same thing for you incl. the final build command.
+
+This runs cmake with the proper CMake toolchain file (location: ´/cmake/cm4.cmake´) and with
+build type ´debug´ in order to include debugging outputs in the build results.
+
+
+NOTE: In future more basic toolchain files will be added instead of cm4.cmake.
+
+### Using clang-tidy
+
+Running static code analysis can be achieved by using the following command:
+
+ cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain.cmake -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_CXX_CLANG_TIDY=/usr/bin/clang-tidy;-checks=google-*,cppcoreguidelines-*" ..
+
+This includes clang-tidy during the build with checks related to:
+
+* Google coding guidelines ( https://google.github.io/styleguide/cppguide.html )
+* C++ core guidelines ( https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines )
+
+Precodition is that you use a docker image that includes clang-tidy in its base image (toolchain image starting from V0.1.0).
+
+## Test Environment
+
+The toolchain has been checked by using a STM3F4Disco board. (https://www.st.com/en/evaluation-tools/stm32f4discovery.html).
+Debugging is done with the STM32 System Workbench (https://www.st.com/en/development-tools/sw4stm32.html)

@@ -1,0 +1,7 @@
+# STM32G474 Nucleo Board Notes
+
+## Pinout
+
+* User LED (green):		PA5
+* User Button (blue):	PC13
+	

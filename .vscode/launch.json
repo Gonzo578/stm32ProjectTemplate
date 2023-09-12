@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "projectName": "stm32-cmake",
+    "configurations": [
+        {
+            "name": "STLink debug",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/application/Hello_Stm32.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "stlink",
+            "device": "STM32g474re",
+            "svdFile": "/opt/st/stm32cubeide_1.11.0/plugins/com.st.stm32cube.ide.mcu.productdb.debug_2.0.400.202211151459/resources/cmsis/STMicroelectronics_CMSIS_SVD/STM32G474xx.svd",
+            "interface": "swd",
+            "runToEntryPoint": "main",
+            "armToolchainPath": "/opt/st/stm32cubeide_1.11.0/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.10.3-2021.10.linux64_1.0.100.202210260954/tools/bin",
+        }
+    ]
+}

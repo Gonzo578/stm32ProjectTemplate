@@ -1,0 +1,5 @@
+# Clock Manager Documentation
+
+## Purpose
+
+The clock control component provides interfaces to configure and control the clocks of the system.

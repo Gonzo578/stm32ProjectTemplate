@@ -1,0 +1,12 @@
+# dio Design Notes
+
+## Targets
+
+* Provide a simple interface to configure and access GPIOs without knowing the concrete registers
+* Abstract just the STM32 device and provide its capabilities
+* Efficient access to ports
+
+## Notes
+
+* Hide concrete registers for the user
+* Different derivatives of the same MCU have a different set of GPIO ports and pins
